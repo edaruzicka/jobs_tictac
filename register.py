@@ -1,4 +1,5 @@
 import requests
+import json
 
 import configparser
 
@@ -8,4 +9,9 @@ acc_info = config['acc_info']
 email = acc_info['email']
 nickname = acc_info['nickname']
 
-r = requests.post('https://piskvorky.jobs.cz/api/v1/user')
+data = {
+    'nickname':nickname, 
+    'email':email}
+
+r = requests.post('https://piskvorky.jobs.cz/api/v1/user', json=data)
+print(r.json())
