@@ -33,6 +33,10 @@ def check_status(user_token, game_token):
     r = requests.post('https://piskvorky.jobs.cz/api/v1/checkStatus', json = {'userToken':user_token, 'gameToken':game_token})
     json_response = r.json()
     print(json_response)
+    code = json_response['statusCode']
+
+    if code == 429:
+        return None, None
 
     actual_player_id = json_response['actualPlayerId']
     winner_id = json_response['winnerId']
@@ -43,12 +47,19 @@ def check_last_status(user_token, game_token):
     r = requests.post('https://piskvorky.jobs.cz/api/v1/checkLastStatus', json = {'userToken':user_token, 'gameToken':game_token})
     json_response = r.json()
     print(json_response)
+    code = json_response['statusCode']
+
+    if code == 429:
+        return None, None, None
 
     actual_player_id = json_response['actualPlayerId']
-    #x = json_response['coordinates']['x']
-    #y = json_response['coordinates']['y']
 
-    return actual_player_id
+    if actual_player_id == user_id:
+        x = json_response['coordinates'][0]['x']
+        y = json_response['coordinates'][0]['y']
+        return actual_player_id, x, y
+    else:
+        return actual_player_id, None, None
 
 def main():
     print(f"{user_id} {user_token}")
@@ -57,20 +68,20 @@ def main():
     winner_id = None
 
     while winner_id == None:
-        print('new run')
-        time.sleep(10)
+        time.sleep(5)
 
         actual_player_id, winner_id = check_status(user_token, game_token)
 
-        time.sleep(10)
+        time.sleep(5)
 
-        if actual_player_id == user_token:
-            #play(user_token, game_token, 0, 0)
+        if actual_player_id == user_id:
             print('MY TURN')
-            player_id = check_last_status(user_token, game_token)
+            actual_player_id, x, y = check_last_status(user_token, game_token)
+            x = x + 1
+            play(user_token, game_token, x, y)
         else:
             print('waiting...')
-            player_id = check_last_status(user_token, game_token)
+            #actual_player_id, x, y = check_last_status(user_token, game_token)
             
 
 
